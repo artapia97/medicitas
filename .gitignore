@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Entorno
+.env
+
+# Base de datos SQLite
+*.db
+*.db-journal
+
+# Herramientas
+.vscode/
+.idea/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Sistema
+Thumbs.db
+.DS_Store
