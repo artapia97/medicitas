@@ -1,5 +1,9 @@
 """Pydantic schemas for request/response models."""
+import re
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 class LoginRequest(BaseModel):
@@ -55,3 +59,60 @@ class SpecialtyRead(BaseModel):
     id: int
     name: str
     description: str | None
+
+
+class DoctorBase(BaseModel):
+    first_name: str = Field(min_length=1, max_length=100)
+    last_name: str = Field(min_length=1, max_length=100)
+    license_number: str = Field(min_length=1, max_length=50)
+    phone: str | None = Field(default=None, max_length=20)
+    email: str | None = Field(default=None, max_length=150)
+    specialty_id: int
+
+    @field_validator("first_name", "last_name", "license_number")
+    @classmethod
+    def _strip_required(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Este campo es obligatorio.")
+        return v
+
+    @field_validator("phone")
+    @classmethod
+    def _strip_phone(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        v = v.strip()
+        return v or None
+
+    @field_validator("email")
+    @classmethod
+    def _validate_email(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        v = v.strip()
+        if not v:
+            return None
+        if not _EMAIL_RE.match(v):
+            raise ValueError("Formato de email inválido.")
+        return v
+
+
+class DoctorCreate(DoctorBase):
+    pass
+
+
+class DoctorUpdate(DoctorBase):
+    is_active: bool
+
+
+class DoctorRead(BaseModel):
+    id: int
+    first_name: str
+    last_name: str
+    license_number: str
+    phone: str | None
+    email: str | None
+    specialty_id: int
+    specialty_name: str
+    is_active: bool
