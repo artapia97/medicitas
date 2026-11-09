@@ -1,5 +1,6 @@
 """Pydantic schemas for request/response models."""
 import re
+from datetime import date
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -115,4 +116,59 @@ class DoctorRead(BaseModel):
     email: str | None
     specialty_id: int
     specialty_name: str
+    is_active: bool
+
+
+class PatientBase(BaseModel):
+    national_id: str = Field(min_length=1, max_length=20)
+    first_name: str = Field(min_length=1, max_length=100)
+    last_name: str = Field(min_length=1, max_length=100)
+    birth_date: date | None = None
+    phone: str = Field(min_length=1, max_length=20)
+    email: str | None = Field(default=None, max_length=150)
+
+    @field_validator("national_id", "first_name", "last_name", "phone")
+    @classmethod
+    def _strip_required(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Este campo es obligatorio.")
+        return v
+
+    @field_validator("email")
+    @classmethod
+    def _validate_email(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        v = v.strip()
+        if not v:
+            return None
+        if not _EMAIL_RE.match(v):
+            raise ValueError("Formato de email inválido.")
+        return v
+
+    @field_validator("birth_date")
+    @classmethod
+    def _no_future_birth_date(cls, v: date | None) -> date | None:
+        if v is not None and v > date.today():
+            raise ValueError("La fecha de nacimiento no puede ser futura.")
+        return v
+
+
+class PatientCreate(PatientBase):
+    pass
+
+
+class PatientUpdate(PatientBase):
+    is_active: bool
+
+
+class PatientRead(BaseModel):
+    id: int
+    national_id: str
+    first_name: str
+    last_name: str
+    birth_date: date | None
+    phone: str
+    email: str | None
     is_active: bool
