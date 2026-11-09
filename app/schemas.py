@@ -1,6 +1,6 @@
 """Pydantic schemas for request/response models."""
 import re
-from datetime import date
+from datetime import date, time
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -172,3 +172,11 @@ class PatientRead(BaseModel):
     phone: str
     email: str | None
     is_active: bool
+
+
+class TimeSlotRead(BaseModel):
+    start_time: time
+    end_time: time
+    available: bool
+    appointment_id: int | None = None
+    status: str | None = None

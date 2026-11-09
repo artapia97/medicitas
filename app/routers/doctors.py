@@ -1,4 +1,5 @@
 """Doctor endpoints."""
+from datetime import date
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
@@ -6,9 +7,10 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import Doctor
-from app.schemas import DoctorCreate, DoctorRead, DoctorUpdate
+from app.schemas import DoctorCreate, DoctorRead, DoctorUpdate, TimeSlotRead
 from app.security import CurrentAdminId
 from app.services import doctors as service
+from app.services import slots as slots_service
 
 router = APIRouter(prefix="/doctors", tags=["doctors"])
 
@@ -55,3 +57,13 @@ def update_doctor(
     db: Annotated[Session, Depends(get_db)],
 ) -> DoctorRead:
     return _to_read(service.update_doctor(db, doctor_id, payload))
+
+
+@router.get("/{doctor_id}/availability", response_model=list[TimeSlotRead])
+def get_availability(
+    doctor_id: int,
+    date: date,
+    _admin: CurrentAdminId,
+    db: Annotated[Session, Depends(get_db)],
+) -> list[TimeSlotRead]:
+    return slots_service.get_availability(db, doctor_id, date)
