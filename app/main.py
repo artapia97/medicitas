@@ -9,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from app import models  # noqa: F401  (register models with Base.metadata)
 from app.config import PROJECT_ROOT
 from app.database import Base, engine
+from app.routers import appointments as appointments_router
 from app.routers import auth as auth_router
 from app.routers import doctors as doctors_router
 from app.routers import patients as patients_router
@@ -44,5 +45,6 @@ app.include_router(auth_router.router, prefix="/api")
 app.include_router(specialties_router.router, prefix="/api")
 app.include_router(doctors_router.router, prefix="/api")
 app.include_router(patients_router.router, prefix="/api")
+app.include_router(appointments_router.router, prefix="/api")
 
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")

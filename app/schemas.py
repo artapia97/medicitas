@@ -1,8 +1,16 @@
 """Pydantic schemas for request/response models."""
 import re
-from datetime import date, time
+from datetime import date, datetime, time
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+    model_validator,
+)
+
+from app.models import AppointmentStatus
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
@@ -180,3 +188,49 @@ class TimeSlotRead(BaseModel):
     available: bool
     appointment_id: int | None = None
     status: str | None = None
+
+
+class AppointmentCreate(BaseModel):
+    patient_id: int
+    doctor_id: int
+    date: date
+    start_time: time
+    reason: str = Field(min_length=1, max_length=500)
+
+    @field_validator("reason")
+    @classmethod
+    def _strip_reason(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("El motivo es obligatorio.")
+        return v
+
+
+class AppointmentUpdate(BaseModel):
+    status: AppointmentStatus | None = None
+    notes: str | None = None
+
+    @model_validator(mode="after")
+    def _require_any_field(self) -> "AppointmentUpdate":
+        if not self.model_fields_set:
+            raise ValueError("Debe enviar al menos un campo para actualizar.")
+        return self
+
+
+class AppointmentRead(BaseModel):
+    id: int
+    patient_id: int
+    patient_first_name: str
+    patient_last_name: str
+    doctor_id: int
+    doctor_first_name: str
+    doctor_last_name: str
+    specialty_id: int
+    specialty_name: str
+    date: date
+    start_time: time
+    end_time: time
+    reason: str
+    status: str
+    notes: str | None
+    created_at: datetime
