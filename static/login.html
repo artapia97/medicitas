@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Iniciar sesión · MediCitas</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="login-page">
+    <main class="login-card">
+        <h1>MediCitas</h1>
+        <p class="muted">Acceso del administrador</p>
+
+        <form id="login-form" novalidate>
+            <div class="form-group" data-field="username">
+                <label for="username">Usuario <span class="required">*</span></label>
+                <input type="text" id="username" name="username"
+                       autocomplete="username" maxlength="50" autofocus>
+                <p class="field-error"></p>
+            </div>
+
+            <div class="form-group" data-field="password">
+                <label for="password">Contraseña <span class="required">*</span></label>
+                <input type="password" id="password" name="password"
+                       autocomplete="current-password">
+                <p class="field-error"></p>
+            </div>
+
+            <p class="alert alert-error" id="form-error" hidden></p>
+
+            <button type="submit" class="btn btn-primary" id="submit-btn">Ingresar</button>
+        </form>
+    </main>
+
+    <script type="module" src="/js/login.js"></script>
+</body>
+</html>
