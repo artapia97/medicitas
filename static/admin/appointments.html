@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Citas · MediCitas</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        /* Estilos específicos de esta pantalla. */
+        .filter-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1.6fr 1fr 1fr;
+            gap: 12px;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+        .filter-grid .form-group { margin-bottom: 0; }
+        .patient-picker { position: relative; }
+        .patient-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 4px;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            max-height: 240px;
+            overflow-y: auto;
+            z-index: 20;
+        }
+        .patient-result {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--color-border);
+        }
+        .patient-result:last-child { border-bottom: none; }
+        .patient-result:hover { background: #f0f4f8; }
+        .patient-result small { color: var(--color-muted); margin-left: 8px; }
+        .patient-result.empty { color: var(--color-muted); cursor: default; }
+        .patient-result.empty:hover { background: transparent; }
+        .patient-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            background: #dbeafe;
+            color: #1e40af;
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+        }
+        .patient-chip button {
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            color: inherit;
+            font-size: 1.1rem;
+            padding: 0;
+            line-height: 1;
+        }
+        .row-actions { display: flex; flex-wrap: wrap; gap: 4px; }
+        .row-actions .btn { white-space: nowrap; }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <div class="page-header">
+            <h1>Citas</h1>
+        </div>
+
+        <section style="margin-bottom: 16px;">
+            <div class="filter-grid">
+                <div class="form-group">
+                    <label for="filter-specialty">Especialidad</label>
+                    <select id="filter-specialty">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="filter-doctor">Médico</label>
+                    <select id="filter-doctor">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="filter-patient-search">Paciente</label>
+                    <div class="patient-picker" id="patient-picker">
+                        <input type="text" id="filter-patient-search"
+                               placeholder="Buscar por cédula o nombre" autocomplete="off">
+                        <div class="patient-results" id="filter-patient-results" hidden></div>
+                    </div>
+                    <div class="patient-chip" id="filter-patient-chip" hidden>
+                        <span id="filter-patient-chip-label"></span>
+                        <button type="button" id="filter-patient-clear" aria-label="Quitar filtro">×</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="filter-date">Fecha</label>
+                    <input type="date" id="filter-date">
+                </div>
+                <div class="form-group">
+                    <label for="filter-status">Estado</label>
+                    <select id="filter-status">
+                        <option value="">Todos</option>
+                        <option value="SCHEDULED">Agendada</option>
+                        <option value="ATTENDED">Atendida</option>
+                        <option value="NO_SHOW">No asistió</option>
+                        <option value="CANCELLED">Cancelada</option>
+                    </select>
+                </div>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" id="clear-filters">Limpiar filtros</button>
+        </section>
+
+        <p class="alert alert-error" id="page-error" hidden></p>
+        <p class="alert alert-info" id="empty-message" hidden>No hay citas con esos filtros.</p>
+
+        <div class="table-wrap" id="table-wrap" hidden>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>Paciente</th>
+                        <th>Médico</th>
+                        <th>Especialidad</th>
+                        <th>Motivo</th>
+                        <th>Estado</th>
+                        <th style="width: 280px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="appointments-tbody"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <div class="modal-backdrop" id="notes-modal" hidden>
+        <div class="modal">
+            <h2>Observaciones de la cita</h2>
+            <div class="form-group">
+                <label for="notes-textarea">Observaciones</label>
+                <textarea id="notes-textarea" rows="6" maxlength="2000"></textarea>
+            </div>
+            <p class="alert alert-error" id="notes-error" hidden></p>
+            <div class="form-actions">
+                <button type="button" class="btn btn-primary" id="notes-save">Guardar</button>
+                <button type="button" class="btn btn-secondary" id="notes-cancel">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/js/appointments.js"></script>
+</body>
+</html>
