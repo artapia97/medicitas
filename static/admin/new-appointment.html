@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Nueva cita · MediCitas</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .section {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .section h2 { margin-top: 0; margin-bottom: 12px; font-size: 1.1rem; }
+        .section h3 { margin: 0 0 8px; font-size: 0.9rem; color: var(--color-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+
+        .patient-picker { position: relative; }
+        .patient-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 4px;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            max-height: 240px;
+            overflow-y: auto;
+            z-index: 20;
+        }
+        .patient-result { padding: 8px 12px; cursor: pointer; border-bottom: 1px solid var(--color-border); }
+        .patient-result:last-child { border-bottom: none; }
+        .patient-result:hover { background: #f0f4f8; }
+        .patient-result small { color: var(--color-muted); margin-left: 8px; }
+        .patient-result.empty { color: var(--color-muted); cursor: default; }
+        .patient-result.empty:hover { background: transparent; }
+
+        .patient-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            background: #dbeafe;
+            color: #1e40af;
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+        }
+        .patient-chip button {
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            color: inherit;
+            font-size: 1.1rem;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .slot-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+        .slot {
+            min-width: 110px;
+            padding: 8px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            background: var(--color-surface);
+            font: inherit;
+            cursor: pointer;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .slot:hover:not(:disabled) { border-color: var(--color-primary); }
+        .slot.selected { background: var(--color-primary); color: #ffffff; border-color: var(--color-primary); }
+        .slot:disabled { cursor: not-allowed; }
+        .slot.is-occupied { background: #f3f4f6; color: var(--color-muted); }
+        .slot.is-past { background: #f3f4f6; color: #9ca3af; text-decoration: line-through; }
+        .slot-time { font-weight: 600; font-size: 0.95rem; }
+        .slot-meta { font-size: 0.75rem; }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <div class="page-header">
+            <h1>Nueva cita</h1>
+        </div>
+
+        <form id="appointment-form" novalidate>
+            <section class="section">
+                <h2>Datos de la cita</h2>
+                <div class="form-row">
+                    <div class="form-group" data-field="patient">
+                        <label>Paciente <span class="required">*</span></label>
+                        <div class="patient-picker" id="patient-picker">
+                            <input type="text" id="patient-search"
+                                   placeholder="Buscar por cédula o nombre" autocomplete="off">
+                            <div class="patient-results" id="patient-results" hidden></div>
+                        </div>
+                        <div class="patient-chip" id="patient-chip" hidden>
+                            <span id="patient-chip-label"></span>
+                            <button type="button" id="patient-chip-clear" aria-label="Cambiar paciente">×</button>
+                        </div>
+                        <p class="field-error" id="patient-error"></p>
+                    </div>
+                    <div class="form-group" data-field="doctor">
+                        <label for="doctor-select">Médico <span class="required">*</span></label>
+                        <select id="doctor-select">
+                            <option value="">— Seleccione —</option>
+                        </select>
+                        <p class="field-error" id="doctor-error"></p>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group" data-field="date">
+                        <label for="date-input">Fecha <span class="required">*</span></label>
+                        <input type="date" id="date-input">
+                        <p class="field-error" id="date-error"></p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>Turno <span class="required">*</span></h2>
+                <p class="muted" id="slots-placeholder">
+                    Seleccione un médico y una fecha para ver los turnos disponibles.
+                </p>
+                <div id="slots-section" hidden>
+                    <p class="alert alert-info" id="slots-empty" hidden></p>
+                    <div id="slot-grids">
+                        <div>
+                            <h3>Mañana</h3>
+                            <div class="slot-grid" id="slot-grid-morning"></div>
+                        </div>
+                        <div style="margin-top: 16px;">
+                            <h3>Tarde (después del almuerzo)</h3>
+                            <div class="slot-grid" id="slot-grid-afternoon"></div>
+                        </div>
+                    </div>
+                </div>
+                <p class="field-error" id="slot-error"></p>
+            </section>
+
+            <section class="section">
+                <h2>Motivo</h2>
+                <div class="form-group" data-field="reason">
+                    <label for="reason">Motivo de la cita <span class="required">*</span></label>
+                    <textarea id="reason" rows="3" maxlength="500"
+                              placeholder="Describa brevemente el motivo"></textarea>
+                    <p class="field-error" id="reason-error"></p>
+                </div>
+            </section>
+
+            <p class="alert alert-error" id="form-error" hidden></p>
+            <p class="alert alert-success" id="form-success" hidden></p>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="submit-btn">Registrar cita</button>
+            </div>
+        </form>
+    </main>
+
+    <script type="module" src="/js/new-appointment.js"></script>
+</body>
+</html>
