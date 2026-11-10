@@ -13,6 +13,7 @@ from app.routers import appointments as appointments_router
 from app.routers import auth as auth_router
 from app.routers import doctors as doctors_router
 from app.routers import patients as patients_router
+from app.routers import public_schedule as public_schedule_router
 from app.routers import specialties as specialties_router
 from app.seed import seed_database
 
@@ -46,5 +47,6 @@ app.include_router(specialties_router.router, prefix="/api")
 app.include_router(doctors_router.router, prefix="/api")
 app.include_router(patients_router.router, prefix="/api")
 app.include_router(appointments_router.router, prefix="/api")
+app.include_router(public_schedule_router.router, prefix="/api")
 
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")

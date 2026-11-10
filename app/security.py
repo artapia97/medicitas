@@ -1,10 +1,11 @@
-"""Password hashing and JWT handling for the administrator."""
+"""Password hashing, JWT handling and internal-network restriction."""
 from datetime import UTC, datetime, timedelta
+from ipaddress import IPv4Address, IPv4Network, IPv6Address, IPv6Network, ip_address, ip_network
 from typing import Annotated
 
 import bcrypt
 import jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.config import settings
@@ -61,3 +62,41 @@ def get_current_admin_id(
 
 
 CurrentAdminId = Annotated[int, Depends(get_current_admin_id)]
+
+
+_IPAddress = IPv4Address | IPv6Address
+_IPNetwork = IPv4Network | IPv6Network
+
+
+def _parse_networks(raw: list[str]) -> list[_IPNetwork]:
+    return [ip_network(entry, strict=False) for entry in raw]
+
+
+_ALLOWED_NETWORKS: list[_IPNetwork] = _parse_networks(settings.internal_networks_list)
+
+
+def _is_internal(client_ip: str) -> bool:
+    try:
+        addr = ip_address(client_ip)
+    except ValueError:
+        return False
+    # Unmap IPv4-mapped IPv6 (e.g. ::ffff:127.0.0.1) before comparing.
+    if isinstance(addr, IPv6Address) and addr.ipv4_mapped is not None:
+        addr = addr.ipv4_mapped
+    for network in _ALLOWED_NETWORKS:
+        if addr.version == network.version and addr in network:
+            return True
+    return False
+
+
+def require_internal_network(request: Request) -> None:
+    client = request.client
+    host = client.host if client is not None else ""
+    if not host or not _is_internal(host):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=(
+                "La agenda pública solo está disponible desde la red "
+                "interna del centro médico."
+            ),
+        )

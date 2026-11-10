@@ -234,3 +234,14 @@ class AppointmentRead(BaseModel):
     status: str
     notes: str | None
     created_at: datetime
+
+
+class PublicScheduleItemRead(BaseModel):
+    date: date
+    start_time: time
+    end_time: time
+    doctor_first_name: str
+    doctor_last_name: str
+    specialty_name: str
+    patient_first_name: str
+    patient_last_name: str
