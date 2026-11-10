@@ -2,10 +2,52 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>MediCitas</title>
+    <title>Agenda · MediCitas</title>
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-    <h1>MediCitas</h1>
-    <p>Servidor en marcha. La agenda pública se implementará más adelante.</p>
+    <main class="container">
+        <div class="page-header">
+            <div>
+                <h1>Agenda médica</h1>
+                <p class="muted" style="margin: 4px 0 0;">Uso interno del centro médico</p>
+            </div>
+            <a href="/login.html" class="muted">Acceso administrador</a>
+        </div>
+
+        <section style="margin-bottom: 16px;">
+            <div class="form-row">
+                <div class="form-group" style="margin: 0;">
+                    <label for="date-input">Fecha</label>
+                    <input type="date" id="date-input">
+                </div>
+                <div class="form-group" id="doctor-filter-group" style="margin: 0;" hidden>
+                    <label for="doctor-select">Médico</label>
+                    <select id="doctor-select">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <p class="alert alert-error" id="error-msg" hidden></p>
+        <p class="alert alert-info" id="empty-msg" hidden></p>
+
+        <div class="table-wrap" id="table-wrap" hidden>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 180px;">Hora</th>
+                        <th>Médico</th>
+                        <th>Especialidad</th>
+                        <th>Paciente</th>
+                    </tr>
+                </thead>
+                <tbody id="schedule-tbody"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <script type="module" src="/js/index.js"></script>
 </body>
 </html>
