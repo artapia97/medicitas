@@ -5,16 +5,7 @@ from zoneinfo import ZoneInfo
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.config import (
-    AFTERNOON_LAST_SLOT,
-    AFTERNOON_START,
-    BUSINESS_DAYS,
-    MORNING_LAST_SLOT,
-    MORNING_START,
-    SLOT_DURATION_MINUTES,
-    TIMEZONE,
-    settings,
-)
+from app.config import BUSINESS_DAYS, SLOT_DURATION_MINUTES, TIMEZONE, settings
 from app.database import SessionLocal
 from app.models import (
     Admin,
@@ -26,23 +17,7 @@ from app.models import (
     normalize_name,
 )
 from app.security import hash_password
-
-
-def _add_minutes(t: time, minutes: int) -> time:
-    return (datetime.combine(date.today(), t) + timedelta(minutes=minutes)).time()
-
-
-def _business_slots() -> list[time]:
-    slots: list[time] = []
-    t = MORNING_START
-    while t <= MORNING_LAST_SLOT:
-        slots.append(t)
-        t = _add_minutes(t, SLOT_DURATION_MINUTES)
-    t = AFTERNOON_START
-    while t <= AFTERNOON_LAST_SLOT:
-        slots.append(t)
-        t = _add_minutes(t, SLOT_DURATION_MINUTES)
-    return slots
+from app.services.slots import add_minutes, business_slots
 
 
 def _next_business_day(d: date) -> date:
@@ -155,7 +130,7 @@ def _load_sample_data(db: Session) -> None:
     today = now.date()
     current_time = now.time()
 
-    slots = _business_slots()
+    slots = business_slots()
     past_slots: list[time] = []
     future_slots: list[time] = []
     if today.weekday() in BUSINESS_DAYS:
@@ -173,7 +148,7 @@ def _load_sample_data(db: Session) -> None:
                 doctor_id=doctors[doctor_idx].id,
                 date=d,
                 start_time=start,
-                end_time=_add_minutes(start, SLOT_DURATION_MINUTES),
+                end_time=add_minutes(start, SLOT_DURATION_MINUTES),
                 reason=reason,
                 status=AppointmentStatus.SCHEDULED.value,
             )
