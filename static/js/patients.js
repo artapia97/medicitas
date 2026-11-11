@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPut, escapeHtml, formatName } from "./api.js";
+import { apiGet, apiPost, apiPut, escapeHtml, formatName, fmtDate, todayIso } from "./api.js";
 import { initAdminPage } from "./admin-nav.js";
 
 if (!initAdminPage()) throw new Error("Redirecting to login");
@@ -65,11 +65,6 @@ function showSuccess(message) {
     formError.hidden = true;
 }
 
-function todayIso() {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
 function validate() {
     clearAllFieldErrors();
     let ok = true;
@@ -121,7 +116,7 @@ function renderTable() {
             <tr>
                 <td>${escapeHtml(p.national_id)}</td>
                 <td>${escapeHtml(formatName(p.first_name, p.last_name))}</td>
-                <td>${escapeHtml(p.birth_date || "")}</td>
+                <td>${escapeHtml(fmtDate(p.birth_date))}</td>
                 <td>${escapeHtml(p.phone)}</td>
                 <td>${escapeHtml(p.email || "")}</td>
                 <td>${stateBadge}</td>

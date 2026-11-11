@@ -1,4 +1,4 @@
-import { apiGet, escapeHtml, formatName } from "./api.js";
+import { apiGet, escapeHtml, formatName, fmtTime, todayIso } from "./api.js";
 
 const dateInput = document.getElementById("date-input");
 const doctorSelect = document.getElementById("doctor-select");
@@ -9,15 +9,6 @@ const emptyMsg = document.getElementById("empty-msg");
 const errorMsg = document.getElementById("error-msg");
 
 let appointments = [];
-
-function todayIso() {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
-function fmtTime(t) {
-    return (t || "").slice(0, 5);
-}
 
 function clearMessages() {
     errorMsg.hidden = true;

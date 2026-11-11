@@ -1,4 +1,4 @@
-import { apiGet, apiPatch, escapeHtml, formatName } from "./api.js";
+import { apiGet, apiPatch, escapeHtml, formatName, fmtDate, fmtTime } from "./api.js";
 import { initAdminPage } from "./admin-nav.js";
 
 if (!initAdminPage()) throw new Error("Redirecting to login");
@@ -49,13 +49,6 @@ const notesCancel = document.getElementById("notes-cancel");
 // --- Helpers ---
 function showPageError(msg) { pageError.textContent = msg; pageError.hidden = false; }
 function clearPageError() { pageError.hidden = true; }
-
-function fmtDate(iso) {
-    if (!iso) return "";
-    const [y, m, d] = iso.split("-");
-    return `${d}/${m}/${y}`;
-}
-function fmtTime(t) { return (t || "").slice(0, 5); }
 
 function startsAt(a) {
     return new Date(`${a.date}T${fmtTime(a.start_time)}:00`);

@@ -1,4 +1,4 @@
-import { apiGet, apiPost, escapeHtml, formatName } from "./api.js";
+import { apiGet, apiPost, escapeHtml, formatName, fmtDate, todayIso } from "./api.js";
 import { initAdminPage } from "./admin-nav.js";
 
 if (!initAdminPage()) throw new Error("Redirecting to login");
@@ -52,17 +52,6 @@ function clearAllErrors() {
     ["patient", "doctor", "date", "reason"].forEach((f) => setFieldError(f, ""));
     document.getElementById("slot-error").textContent = "";
     formError.hidden = true;
-}
-
-function todayIso() {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
-function fmtDate(iso) {
-    if (!iso) return "";
-    const [y, m, d] = iso.split("-");
-    return `${d}/${m}/${y}`;
 }
 
 function isSunday(iso) {
